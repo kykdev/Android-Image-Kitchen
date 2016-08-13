@@ -1,6 +1,4 @@
 @echo off
 
 cd %~p0
-rd /s /q ramdisk > nul 2>&1
-rd /s /q split_img > nul 2>&1
-del *new.* > nul 2>&1
+if exist workspace_* for /f "delims=" %%a in ('dir /a:d /s /b workspace_*') do rd /s /q %%a > nul 2>&1

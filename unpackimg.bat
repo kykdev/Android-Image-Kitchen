@@ -6,7 +6,9 @@ set hideErrors=n
 cd "%~p0"
 if "%~1" == "" goto noargs
 set "file=%~f1"
-set bin=..\android_win_tools
+set "rootdir=%~p0"
+set "outdir=workspace_%~nx1"
+set "bin=%rootdir%\android_win_tools"
 set "errout= "
 if "%hideErrors%" == "y" set "errout=2>nul"
 
@@ -17,8 +19,8 @@ echo.
 echo Supplied image: %~nx1
 echo.
 
-if exist split_img\nul set "noclean=1"
-if exist ramdisk\nul set "noclean=1"
+if exist %outdir%\split_img\nul set "noclean=1"
+if exist %outdir%\ramdisk\nul set "noclean=1"
 if not "%noclean%" == "1" goto noclean
 echo Removing old work folders and files . . .
 echo.
@@ -27,12 +29,12 @@ call cleanup.bat
 :noclean
 echo Setting up work folders . . .
 echo.
-md split_img
-md ramdisk
+md %outdir%\split_img
+md %outdir%\ramdisk
 
-echo Splitting image to "/split_img/" . . .
+echo Splitting image to "/%outdir%/split_img/" . . .
 echo.
-cd split_img
+cd %outdir%\split_img
 %bin%\unpackbootimg -i "%file%"
 if errorlevel == 1 call "%~p0\cleanup.bat" & goto error
 echo.
@@ -45,17 +47,17 @@ if "%ramdiskcomp%" == "xz" set "unpackcmd=xz -dc" & set "compext=xz"
 if "%ramdiskcomp%" == "bzip2" set "unpackcmd=bzip2 -dc" & set "compext=bz2"
 if "%ramdiskcomp%" == "lz4" ( set "unpackcmd=lz4" & set "extra=stdout 2>nul" & set "compext=lz4"  ) else ( set "extra= " )
 ren *ramdisk.gz *ramdisk.cpio.%compext%
-cd ..
+cd %rootdir%
 
-echo Unpacking ramdisk to "/ramdisk/" . . .
+echo Unpacking ramdisk to "/%outdir%/ramdisk/" . . .
 echo.
-cd ramdisk
+cd %outdir%\ramdisk
 echo Compression used: %ramdiskcomp%
 if "%compext%" == "" goto error
-%bin%\%unpackcmd% "../split_img/%~nx1-ramdisk.cpio.%compext%" %extra% %errout% | %bin%\cpio -i %errout%
+%bin%\%unpackcmd% "%rootdir%/%outdir%/split_img/%~nx1-ramdisk.cpio.%compext%" %extra% %errout% | %bin%\cpio -i %errout%
 if errorlevel == 1 goto error
 echo.
-cd ..
+cd %rootdir%
 
 echo Done!
 goto end
