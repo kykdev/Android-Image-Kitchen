@@ -1,7 +1,5 @@
 @echo off
 
-%~d0
-cd "%~p0"
 if "%~1" == "--help" echo usage: cleanup.bat & goto end
 
 rd /s /q ramdisk >nul 2>&1

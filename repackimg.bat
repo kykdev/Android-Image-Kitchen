@@ -2,13 +2,11 @@
 setlocal
 set CYGWIN=nodosfilewarning
 
-%~d0
-cd "%~p0"
 if "%~1" == "--help" echo usage: repackimg.bat [--original] [--level ^<0-9^>] [--avbkey ^<name^>] & goto end
 dir /a-d split_img >nul 2>&1 || goto nofiles
 dir /a-d ramdisk >nul 2>&1 || goto nofiles
 set "bin=%~dp0\android_win_tools"
-set "rel=android_win_tools"
+set "rel=%~dp0\android_win_tools"
 
 echo Android Image Kitchen - RepackImg Script
 echo by osm0sis @ xda-developers
