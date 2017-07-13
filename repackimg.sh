@@ -81,6 +81,8 @@ else
     lz4) repackcmd="$bin/$hostarch/lz4 $level -l";;
     *) abort; exit 1;;
   esac;
+  placeholder="$(sudo find ramdisk -type f -name ".placeholder")";
+  sudo rm $placeholder 2> /dev/null;
   if [ "$sumsg" ]; then
     cd ramdisk;
     sudo find . | sudo cpio -H newc -o 2> /dev/null | $repackcmd > ../ramdisk-new.cpio.$compext;
@@ -88,7 +90,12 @@ else
   else
     $bin/$hostarch/mkbootfs ramdisk | $repackcmd > ramdisk-new.cpio.$compext;
   fi;
-  if [ ! $? -eq "0" ]; then
+  result="$?";
+  if [ ! -z "$placeholder" ]; then
+    sudo touch $placeholder;
+    sudo chown 1000:1000 $placeholder;
+  fi;
+  if [ ! $result -eq "0" ]; then
     abort;
     exit 1;
   fi;
