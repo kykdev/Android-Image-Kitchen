@@ -3,7 +3,7 @@
 # osm0sis @ xda-developers
 
 cleanup() { $sudo$rmsu rm -rf ramdisk split_img *new.*; }
-abort() { cd "$aik"; echo "Error!"; }
+abort() { echo "Error!"; }
 
 case $1 in
   --help) echo "usage: unpackimg.sh [--sudo] <file>"; exit 1;;
@@ -13,10 +13,9 @@ esac;
 aik="${BASH_SOURCE:-$0}";
 aik="$(dirname "$(readlink -f "$aik")")";
 bin="$aik/bin";
-rel=bin;
+rel="$bin";
 
-cd "$aik";
-chmod -R 755 $bin *.sh;
+chmod -R 755 $bin $aik/*.sh;
 chmod 644 $bin/magic $bin/androidbootimg.magic $bin/BootSignature.jar $bin/avb/* $bin/chromeos/*;
 
 arch=`uname -m`;
@@ -81,7 +80,7 @@ if [ "$(echo $imgtest | awk '{ print $2 }' | cut -d, -f1)" = "signing" ]; then
       rm -rf split_img/$file-sigtype;
     ;;
   esac;
-  img="$aik/split_img/$file";
+  img="split_img/$file";
 fi;
 
 imgtest="$(file -m $rel/androidbootimg.magic "$img" | cut -d: -f2-)";
@@ -174,14 +173,14 @@ if [ ! $? -eq "0" ]; then
   exit 1;
 fi;
 
-if [ "$(file -m ../$rel/androidbootimg.magic *-zImage | cut -d: -f2 | awk '{ print $1 }')" = "MTK" ]; then
+if [ "$(file -m $rel/androidbootimg.magic *-zImage | cut -d: -f2 | awk '{ print $1 }')" = "MTK" ]; then
   mtk=1;
   echo " ";
   echo "MTK header found in zImage, removing...";
   dd bs=512 skip=1 conv=notrunc if="$file-zImage" of=tempzimg 2>/dev/null;
   mv -f tempzimg "$file-zImage";
 fi;
-mtktest="$(file -m ../$rel/androidbootimg.magic *-ramdisk*.gz | cut -d: -f2-)";
+mtktest="$(file -m $rel/androidbootimg.magic *-ramdisk*.gz | cut -d: -f2-)";
 mtktype=$(echo $mtktest | awk '{ print $3 }');
 if [ "$(echo $mtktest | awk '{ print $1 }')" = "MTK" ]; then
   if [ ! "$mtk" ]; then
@@ -203,7 +202,7 @@ fi;
 test "$mtk" && echo $mtktype > "$file-mtktype";
 
 if [ -f *-dtb ]; then
-  dtbtest="$(file -m ../$rel/androidbootimg.magic *-dtb | cut -d: -f2 | awk '{ print $1 }')";
+  dtbtest="$(file -m $rel/androidbootimg.magic *-dtb | cut -d: -f2 | awk '{ print $1 }')";
   if [ "$imgtype" = "ELF" ]; then
     case $dtbtest in
       QCDT|ELF) ;;
@@ -217,7 +216,7 @@ if [ -f *-dtb ]; then
   fi;
 fi;
 
-file -m ../$rel/magic *-ramdisk*.gz | cut -d: -f2 | awk '{ print $1 }' > "$file-ramdiskcomp";
+file -m $rel/magic *-ramdisk*.gz | cut -d: -f2 | awk '{ print $1 }' > "$file-ramdiskcomp";
 ramdiskcomp=`cat *-ramdiskcomp`;
 unpackcmd="$ramdiskcomp -dc";
 compext=$ramdiskcomp;
