@@ -3,10 +3,8 @@ setlocal
 set CYGWIN=nodosfilewarning
 
 set "bin=%~dp0\android_win_tools"
-set "rel=android_win_tools"
+set "rel=%bin%"
 set "cur=%cd%"
-%~d0
-cd "%~p0"
 if "%~1" == "--help" echo usage: repackimg.bat [--original] [--level ^<0-9^>] [--avbkey ^<name^>] & goto end
 dir /a-d split_img >nul 2>&1 || goto nofiles
 for /f "delims=" %%a in ('dir /b split_img\*-ramdiskcomp') do @set "ramdiskcname=%%a"

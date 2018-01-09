@@ -4,10 +4,8 @@ set CYGWIN=nodosfilewarning
 
 set "aik=%~dp0"
 set "bin=%~dp0\android_win_tools"
-set "rel=..\android_win_tools"
+set "rel=.."
 set "cur=%cd%"
-%~d0
-cd "%~p0"
 if "%~1" == "--help" echo usage: unpackimg.bat ^<file^> & goto end
 if "[%~1]" == "[]" (
   for /f "delims=" %%a in ('dir /b /o *.elf *.img *.sin 2^>nul') do (
@@ -51,6 +49,9 @@ md split_img
 if errorlevel == 1 call "%aik%\cleanup.bat" >nul & goto error
 md ramdisk
 if errorlevel == 1 call "%aik%\cleanup.bat" >nul & goto error
+
+copy "%bin%"\androidbootimg.magic "%cur%"\androidbootimg.magic >nul
+copy "%bin%"\magic "%cur%"\magic >nul
 
 cd split_img
 "%bin%"\file -m %rel%\androidbootimg.magic "%file%" | "%bin%"\cut -d: -f2- | "%bin%"\cut -d: -f2 | "%bin%"\cut -d" " -f3 | "%bin%"\cut -d, -f1 > "%~nx1-imgtype"
@@ -250,6 +251,8 @@ echo No image file supplied.
 echo Error!
 
 :end
+del "%cur%"\androidbootimg.magic 2>nul
+del "%cur%"\magic 2>nul
 echo.
 echo %cmdcmdline% | findstr /i pushd >nul
 if errorlevel 1 pause

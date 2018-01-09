@@ -3,8 +3,6 @@ setlocal
 set CYGWIN=nodosfilewarning
 
 set "bin=%~dp0\android_win_tools"
-%~d0
-cd "%~p0"
 if "%~1" == "--help" echo usage: cleanup.bat & goto end
 
 "%bin%"\chmod -fR +rw ramdisk split_img >nul 2>&1
