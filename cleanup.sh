@@ -17,7 +17,6 @@ esac;
 aik="${BASH_SOURCE:-$0}";
 aik="$(dirname "$(readlink -f "$aik")")";
 
-cd "$aik";
 if [ -d ramdisk ] && [ "$(stat $statarg ramdisk | head -n 1)" = "root" -o ! "$(find ramdisk 2>&1 | cpio -o >/dev/null 2>&1; echo $?)" -eq "0" ]; then
   sudo=sudo;
 fi;

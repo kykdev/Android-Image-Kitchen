@@ -2,7 +2,7 @@
 # AIK-Linux/repackimg: repack ramdisk and build image
 # osm0sis @ xda-developers
 
-abort() { cd "$aik"; echo "Error!"; }
+abort() { echo "Error!"; }
 
 case $1 in
   --help) echo "usage: repackimg.sh [--original] [--level <0-9>] [--avbkey <name>] [--forceelf]"; exit 1;
@@ -20,7 +20,7 @@ arch=$plat/`uname -m`;
 aik="${BASH_SOURCE:-$0}";
 aik="$(dirname "$(readlink -f "$aik")")";
 bin="$aik/bin";
-rel=bin;
+rel="$bin";
 cur="$(readlink -f "$PWD")";
 
 case $plat in
@@ -38,8 +38,7 @@ case $plat in
   ;;
 esac;
 
-cd "$aik";
-chmod -R 755 "$bin" *.sh;
+chmod -R 755 "$bin" "$aik"/*.sh;
 chmod 644 "$bin/magic" "$bin/androidbootimg.magic" "$bin/BootSignature.jar" "$bin/avb/"* "$bin/chromeos/"*;
 
 ramdiskcomp=`cat split_img/*-ramdiskcomp 2>/dev/null`;

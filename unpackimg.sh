@@ -3,7 +3,7 @@
 # osm0sis @ xda-developers
 
 cleanup() { $aik/cleanup.sh --quiet; }
-abort() { cd "$aik"; echo "Error!"; }
+abort() { echo "Error!"; }
 
 case $1 in
   --help) echo "usage: unpackimg.sh [--nosudo] <file>"; exit 1;;
@@ -26,7 +26,7 @@ arch=$plat/`uname -m`;
 aik="${BASH_SOURCE:-$0}";
 aik="$(dirname "$(readlink -f "$aik")")";
 bin="$aik/bin";
-rel=bin;
+rel="$bin";
 cur="$(readlink -f "$PWD")";
 
 case $plat in
@@ -46,8 +46,7 @@ case $plat in
   ;;
 esac;
 
-cd "$aik";
-chmod -R 755 "$bin" *.sh;
+chmod -R 755 "$bin" "$aik"/*.sh;
 chmod 644 "$bin/magic" "$bin/androidbootimg.magic" "$bin/BootSignature.jar" "$bin/avb/"* "$bin/chromeos/"*;
 
 test -f "$cur/$1" && img="$cur/$1" || img="$1";
@@ -90,7 +89,7 @@ echo "Setting up work folders...";
 echo " ";
 mkdir split_img ramdisk;
 
-imgtest="$(file -m $rel/androidbootimg.magic "$img" | cut -d: -f2-)";
+imgtest="$(file -m "$rel"/androidbootimg.magic "$img" | cut -d: -f2-)";
 if [ "$(echo $imgtest | awk '{ print $2 }' | cut -d, -f1)" = "signing" ]; then
   echo $imgtest | awk '{ print $1 }' > "split_img/$file-sigtype";
   sigtype=$(cat "split_img/$file-sigtype");
@@ -120,10 +119,10 @@ if [ "$(echo $imgtest | awk '{ print $2 }' | cut -d, -f1)" = "signing" ]; then
       rm -rf "split_img/$file-sigtype";
     ;;
   esac;
-  img="$aik/split_img/$file";
+  img="split_img/$file";
 fi;
 
-imgtest="$(file -m $rel/androidbootimg.magic "$img" | cut -d: -f2-)";
+imgtest="$(file -m "$rel"/androidbootimg.magic "$img" | cut -d: -f2-)";
 if [ "$(echo $imgtest | awk '{ print $2 }' | cut -d, -f1)" = "bootimg" ]; then
   test "$(echo $imgtest | awk '{ print $3 }')" = "PXA" && typesuffix=-PXA;
   echo "$(echo $imgtest | awk '{ print $1 }')$typesuffix" > "split_img/$file-imgtype";
@@ -158,7 +157,7 @@ if [ "$(echo $imgtest | awk '{ print $3 }')" = "LOKI" ]; then
   img="$file";
 fi;
 
-tailtest="$(tail -n50 "$img" 2>/dev/null | file -m $rel/androidbootimg.magic - | cut -d: -f2-)";
+tailtest="$(tail -n50 "$img" 2>/dev/null | file -m "$rel"/androidbootimg.magic - | cut -d: -f2-)";
 tailtype="$(echo $tailtest | awk '{ print $1 }')";
 case $tailtype in
   AVB)
@@ -223,14 +222,14 @@ if [ "$imgtype" = "AOSP" ] && [ "$(cat "$file-hash")" = "unknown" ]; then
   echo "sha1" > "$file-hash";
 fi;
 
-if [ "$(file -m ../$rel/androidbootimg.magic *-zImage | cut -d: -f2 | awk '{ print $1 }')" = "MTK" ]; then
+if [ "$(file -m "$rel"/androidbootimg.magic *-zImage | cut -d: -f2 | awk '{ print $1 }')" = "MTK" ]; then
   mtk=1;
   echo " ";
   echo "MTK header found in zImage, removing...";
   dd bs=512 skip=1 conv=notrunc if="$file-zImage" of=tempzimg 2>/dev/null;
   mv -f tempzimg "$file-zImage";
 fi;
-mtktest="$(file -m ../$rel/androidbootimg.magic *-ramdisk*.gz | cut -d: -f2-)";
+mtktest="$(file -m "$rel"/androidbootimg.magic *-ramdisk*.gz | cut -d: -f2-)";
 mtktype=$(echo $mtktest | awk '{ print $3 }');
 if [ "$(echo $mtktest | awk '{ print $1 }')" = "MTK" ]; then
   if [ ! "$mtk" ]; then
@@ -252,7 +251,7 @@ fi;
 test "$mtk" && echo $mtktype > "$file-mtktype";
 
 if [ -f *-dtb ]; then
-  dtbtest="$(file -m ../$rel/androidbootimg.magic *-dtb | cut -d: -f2 | awk '{ print $1 }')";
+  dtbtest="$(file -m "$rel"/androidbootimg.magic *-dtb | cut -d: -f2 | awk '{ print $1 }')";
   echo $dtbtest > "$file-dtbtype";
   if [ "$imgtype" = "ELF" ]; then
     case $dtbtest in
@@ -267,7 +266,7 @@ if [ -f *-dtb ]; then
   fi;
 fi;
 
-file -m ../$rel/magic *-ramdisk*.gz | cut -d: -f2 | awk '{ print $1 }' > "$file-ramdiskcomp";
+file -m "$rel"/magic *-ramdisk*.gz | cut -d: -f2 | awk '{ print $1 }' > "$file-ramdiskcomp";
 ramdiskcomp=`cat *-ramdiskcomp`;
 unpackcmd="$ramdiskcomp -dc";
 compext=$ramdiskcomp;
